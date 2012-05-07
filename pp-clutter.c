@@ -522,13 +522,13 @@ play_pause (ClutterActor *actor,
     {
       g_timer_continue (renderer->timer);
       renderer->timer_paused = FALSE;
-      clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_pause), "pause");
+      clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_pause), "Pause");
     }
   else
     {
       g_timer_stop (renderer->timer);
       renderer->timer_paused = TRUE;
-      clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_pause), "go");
+      clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_pause), "Go");
     }
   return TRUE;
 }
@@ -608,6 +608,9 @@ start (ClutterActor *actor,
        gpointer      data)
 {
   ClutterRenderer *renderer = CLUTTER_RENDERER (data);
+
+  clutter_text_set_text(renderer->speaker_start, "Restart");
+
   g_timer_stop (renderer->timer);
   g_timer_start (renderer->timer);
   renderer->timer_paused = FALSE;
@@ -678,16 +681,16 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
   renderer->speaker_buttons_group = clutter_group_new ();
 
 
-#define BUTTON_FONT "Sans 20px"
+#define BUTTON_FONT "Sans 16px"
 
   renderer->speaker_speakerscreen = g_object_new (CLUTTER_TYPE_TEXT,
                                 "x",           10.0,
                                 "y",           0.0,
                                 "opacity",     NORMAL_OPACITY,
                                 "font-name",   BUTTON_FONT,
-                                "text",        "speaker",
+                                "text",        "Speaker",
                                 "reactive",    TRUE,
-                                "color",       &white,
+                                "color",       &black,
                                 NULL);
 
   renderer->speaker_rehearse = g_object_new (CLUTTER_TYPE_TEXT,
@@ -695,25 +698,25 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
                                 "y",           0.0,
                                 "opacity",     NORMAL_OPACITY,
                                 "font-name",   BUTTON_FONT,
-                                "text",        "rehearse",
+                                "text",        "Rehearse",
                                 "reactive",    TRUE,
-                                "color",       &white,
+                                "color",       &black,
                                 NULL);
   renderer->speaker_autoadvance = g_object_new (CLUTTER_TYPE_TEXT,
                                 "y",           0.0,
                                 "opacity",     NORMAL_OPACITY,
                                 "font-name",   BUTTON_FONT,
-                                "text",        "enable autoadvance",
+                                "text",        "Autoadvance",
                                 "reactive",    TRUE,
-                                "color",       &white,
+                                "color",       &black,
                                 NULL);
   renderer->speaker_start = g_object_new (CLUTTER_TYPE_TEXT,
                                 "y",           0.0,
                                 "opacity",     NORMAL_OPACITY,
                                 "font-name",   BUTTON_FONT,
-                                "text",        "(re)start",
+                                "text",        "Start",
                                 "reactive",    TRUE,
-                                "color",       &white,
+                                "color",       &black,
                                 NULL);
   renderer->speaker_pause = g_object_new (CLUTTER_TYPE_TEXT,
                                 "y",           0.0,
@@ -721,7 +724,7 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
                                 "font-name",   BUTTON_FONT,
                                 "text",        "",
                                 "reactive",    TRUE,
-                                "color",       &white,
+                                "color",       &black,
                                 NULL);
 
   renderer->speaker_fullscreen = g_object_new (CLUTTER_TYPE_TEXT,
@@ -729,9 +732,9 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
                                 "y",           0.0,
                                 "opacity",     NORMAL_OPACITY,
                                 "font-name",   BUTTON_FONT,
-                                "text",        "fullscreen",
+                                "text",        "Fullscreen",
                                 "reactive",    TRUE,
-                                "color",       &white,
+                                "color",       &black,
                                 NULL);
 
   renderer->speaker_buttonbar = g_object_new(CLUTTER_TYPE_RECTANGLE,
