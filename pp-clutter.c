@@ -79,6 +79,8 @@ static ClutterColor black = {0x00,0x00,0x00,0xff};
 static ClutterColor white = {0xff,0xff,0xff,0xff};
 static ClutterColor red   = {0xff,0x00,0x00,0xff};
 
+static ClutterColor gray  = {0x80,0x80,0x80,0xff};
+
 #ifdef HAVE_PDF
 PinPointRenderer *pp_cairo_renderer   (void);
 #endif
@@ -118,6 +120,7 @@ typedef struct _ClutterRenderer
   gdouble          slide_start_time;
 
   ClutterActor    *speaker_buttons_group;
+  ClutterActor    *speaker_buttonbar;
   ClutterActor    *speaker_speakerscreen;
   ClutterActor    *speaker_rehearse;
   ClutterActor    *speaker_autoadvance;
@@ -674,10 +677,11 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
 
   renderer->speaker_buttons_group = clutter_group_new ();
 
+
 #define BUTTON_FONT "Sans 20px"
 
   renderer->speaker_speakerscreen = g_object_new (CLUTTER_TYPE_TEXT,
-                                "x",           0.0,
+                                "x",           10.0,
                                 "y",           0.0,
                                 "opacity",     NORMAL_OPACITY,
                                 "font-name",   BUTTON_FONT,
@@ -730,6 +734,17 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
                                 "color",       &white,
                                 NULL);
 
+  renderer->speaker_buttonbar = g_object_new(CLUTTER_TYPE_RECTANGLE,
+		  	  	  	  	  	    "x",		   0.0,
+		  	  	  	  	  	    "y",		   0.0,
+		  	  	  	  	  	    "opacity",	   255,
+		  	  	  	  	  	    "color",	   &gray,
+		  	  	  	  	  	  	NULL);
+
+  clutter_actor_set_height(renderer->speaker_buttonbar,
+		  	  	  	  	  	  clutter_actor_get_height(renderer->speaker_pause)*1.1);
+
+
   opacity_hover(renderer->speaker_speakerscreen);
   opacity_hover(renderer->speaker_rehearse);
 
@@ -754,6 +769,7 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
   opacity_hover(renderer->speaker_fullscreen);
 
   clutter_container_add (CLUTTER_CONTAINER (renderer->speaker_buttons_group),
+		  	  	  	  	 renderer->speaker_buttonbar,
                          renderer->speaker_speakerscreen,
                          renderer->speaker_start,
                          renderer->speaker_pause,
@@ -1859,6 +1875,9 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
 #define append_ltr(a,b) \
   clutter_actor_set_x (b, clutter_actor_get_x (a) + clutter_actor_get_width (a) + 20)
 
+	clutter_actor_set_width(renderer->speaker_buttonbar, nw);
+	clutter_actor_set_x(renderer->speaker_speakerscreen, 10.0);
+
     /* should be replace with constraints */
     append_ltr (renderer->speaker_speakerscreen, renderer->speaker_start);
     append_ltr (renderer->speaker_start, renderer->speaker_pause);
@@ -1887,8 +1906,9 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
                               nw, nh);
     clutter_actor_set_y (renderer->speaker_slide_prog_warning, 0);*/
 
-    clutter_actor_set_x (renderer->speaker_buttons_group, nw * 0.4);
-    clutter_actor_set_y (renderer->speaker_buttons_group, 5);
+    //clutter_actor_set_x (renderer->speaker_buttons_group, nw * 0.4);
+    clutter_actor_set_x (renderer->speaker_buttons_group, 0);
+    clutter_actor_set_y (renderer->speaker_buttons_group, 0);
 
     clutter_actor_set_width (renderer->speaker_prog_bg, nw);
 
