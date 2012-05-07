@@ -1951,6 +1951,15 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
     elapsed_part = current_slide_time / current_slide_duration;
   }
 
+  // if first slide, do not show "previous"
+  if (!pp_slidep->prev) clutter_actor_hide(renderer->speaker_prev);
+  else clutter_actor_show(renderer->speaker_prev);
+
+  // same for last slide
+  if (!pp_slidep->next) clutter_actor_hide(renderer->speaker_next);
+  else clutter_actor_show(renderer->speaker_next);
+
+
   {
     float scale;
     scale = nh / clutter_actor_get_height (renderer->speaker_next) * 0.4;
