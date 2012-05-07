@@ -1426,6 +1426,8 @@ key_pressed (ClutterActor    *actor,
         next_slide (renderer);
         break;
       case CLUTTER_Escape:
+      case CLUTTER_Q:
+      case CLUTTER_q:
         clutter_main_quit ();
         break;
       case CLUTTER_F1:
