@@ -80,6 +80,8 @@ static ClutterColor white = {0xff,0xff,0xff,0xff};
 static ClutterColor red   = {0xff,0x00,0x00,0xff};
 
 static ClutterColor gray  = {0x80,0x80,0x80,0xff};
+static ClutterColor lightgray  = {0xdd,0xdd,0xdd,0xff};
+
 
 #ifdef HAVE_PDF
 PinPointRenderer *pp_cairo_renderer   (void);
@@ -129,6 +131,8 @@ typedef struct _ClutterRenderer
   ClutterActor    *speaker_fullscreen;
 
   ClutterActor    *speaker_notes;
+
+  ClutterActor    *speaker_preview_bar;
   ClutterActor    *speaker_prev;
   ClutterActor    *speaker_current;
   ClutterActor    *speaker_next;
@@ -801,12 +805,20 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
   clutter_stage_set_color (CLUTTER_STAGE (renderer->speaker_screen), &black);
   clutter_stage_set_user_resizable (CLUTTER_STAGE (renderer->speaker_screen), TRUE);
 
-  renderer->speaker_prev = clutter_cairo_texture_new (PREVIEW_WIDTH, PREVIEW_HEIGHT);
-  renderer->speaker_current = clutter_cairo_texture_new (PREVIEW_WIDTH, PREVIEW_HEIGHT);
-  renderer->speaker_next = clutter_cairo_texture_new (PREVIEW_WIDTH, PREVIEW_HEIGHT);
+
+  renderer->speaker_preview_bar = g_object_new(CLUTTER_TYPE_RECTANGLE,
+		  	  	  	  	  	  	  	  	  	  	  "x", 				0.0,
+		  	  	  	  	  	  	  	  	  	  	  "y",				0.0,
+		  	  	  	  	  	  	  	  	  	  	  "opacity",		255,
+		  	  	  	  	  	  	  	  	  	  	  "color",			&lightgray,
+		  	  	  	  	  	  	  	  	  	  	  NULL);
+
+  renderer->speaker_prev = clutter_cairo_texture_new (PREVIEW_WIDTH-1, PREVIEW_HEIGHT-1);
+  renderer->speaker_current = clutter_cairo_texture_new (PREVIEW_WIDTH-1, PREVIEW_HEIGHT-1);
+  renderer->speaker_next = clutter_cairo_texture_new (PREVIEW_WIDTH-1, PREVIEW_HEIGHT-1);
 
   clutter_container_add (CLUTTER_CONTAINER (renderer->speaker_screen),
-
+		  	  	  	  	 renderer->speaker_preview_bar,
                          renderer->speaker_prev,
                          renderer->speaker_current,
                          renderer->speaker_next,
@@ -831,6 +843,10 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
 
   opacity_hover(renderer->speaker_prev);
   opacity_hover(renderer->speaker_next);
+
+  // reset opacity:
+  clutter_actor_set_opacity (renderer->speaker_prev, 200);
+  clutter_actor_set_opacity (renderer->speaker_next, 200);
 
   g_signal_connect (renderer->speaker_prev, "button-press-event",
                     G_CALLBACK (go_prev), renderer);
@@ -1941,6 +1957,10 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
     clutter_actor_set_scale (renderer->speaker_prev, scale, scale);
     clutter_actor_set_scale (renderer->speaker_current, scale, scale);
     clutter_actor_set_scale (renderer->speaker_next, scale, scale);
+
+    clutter_actor_set_width(renderer->speaker_preview_bar,
+    						clutter_actor_get_width(renderer->speaker_current)*scale+2);
+    clutter_actor_set_height(renderer->speaker_preview_bar, nh);
   }
 
   {
@@ -1993,13 +2013,13 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
 
   clutter_actor_set_position (renderer->speaker_prev,
                               nw * 0.0,
-                              nh * -0.1);
+                              nh * -0.1-2);
   clutter_actor_set_position (renderer->speaker_current,
                               nw * 0.0,
                               nh * 0.3);
   clutter_actor_set_position (renderer->speaker_next,
                               nw * 0.0,
-                              nh * 0.7);
+                              nh * 0.7+2);
   clutter_actor_set_position (renderer->speaker_notes,
                               nw * 0.46,
                               (20.0+clutter_actor_get_height(CLUTTER_ACTOR(renderer->speaker_buttons_group))));
