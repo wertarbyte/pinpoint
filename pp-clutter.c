@@ -653,13 +653,16 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
 {
   renderer->speaker_screen = clutter_stage_new ();
   clutter_stage_set_title(CLUTTER_STAGE(renderer->speaker_screen), "Pinpoint speaker screen");
-
+//20.0
   renderer->speaker_notes = g_object_new (CLUTTER_TYPE_TEXT,
                                 "x", 10.0,
-                                "y", 20.0,
+                                "y", 0.0,
                                 "font-name",      "Sans 20px",
                                 "color",          &white,
+                                "width", clutter_actor_get_width(CLUTTER_ACTOR(renderer->speaker_screen)),
                                 NULL);
+
+  clutter_text_set_line_wrap(CLUTTER_TEXT(renderer->speaker_notes), TRUE);
 
   renderer->speaker_time_remaining = g_object_new (CLUTTER_TYPE_TEXT,
                                 "x",           300.0,
