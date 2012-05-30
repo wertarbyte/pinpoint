@@ -1648,7 +1648,7 @@ action_slide (ClutterRenderer *renderer)
 static char *pp_lookup_transition (const char *transition)
 {
   int   i;
-  char *dirs[] ={ "", "./transitions/", PKGDATADIR, NULL};
+  char *dirs[] ={ "", PINPOINT_SRCDIR "/transitions/", PKGDATADIR, NULL};
 
   for (i = 0; dirs[i]; i++)
     {
