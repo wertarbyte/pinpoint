@@ -613,7 +613,7 @@ start (ClutterActor *actor,
 {
   ClutterRenderer *renderer = CLUTTER_RENDERER (data);
 
-  clutter_text_set_text(renderer->speaker_start, "Restart");
+  clutter_text_set_text(CLUTTER_TEXT(renderer->speaker_start), "Restart");
 
   g_timer_stop (renderer->timer);
   g_timer_start (renderer->timer);
@@ -661,6 +661,7 @@ speaker_screen_deleted (ClutterActor *actor,
 static void
 clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
 {
+
   renderer->speaker_screen = clutter_stage_new ();
   clutter_stage_set_title(CLUTTER_STAGE(renderer->speaker_screen), "Pinpoint speaker screen");
 
@@ -1853,12 +1854,6 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
   if (!renderer->speaker_mode)
     goto out;
 
-  if (point->speaker_notes)
-    clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_notes),
-                           point->speaker_notes);
-  else
-    clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_notes), "");
-
   nw = clutter_actor_get_width (renderer->speaker_screen) + 1;
   nh = clutter_actor_get_height (renderer->speaker_screen);
 
@@ -1927,7 +1922,6 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
                               nw, nh);
     clutter_actor_set_y (renderer->speaker_slide_prog_warning, 0);*/
 
-    //clutter_actor_set_x (renderer->speaker_buttons_group, nw * 0.4);
     clutter_actor_set_x (renderer->speaker_buttons_group, 0);
     clutter_actor_set_y (renderer->speaker_buttons_group, 0);
 
@@ -2029,12 +2023,19 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
   clutter_actor_set_position (renderer->speaker_next,
                               nw * 0.0,
                               nh * 0.7+2);
-  clutter_actor_set_position (renderer->speaker_notes,
-                              nw * 0.46,
-                              (20.0+clutter_actor_get_height(CLUTTER_ACTOR(renderer->speaker_buttons_group))));
-  clutter_actor_set_width    (renderer->speaker_notes,
-                              nw * 0.5);
-
+  // speaker notes
+  if (point->speaker_notes) {
+    clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_notes),
+                           point->speaker_notes);
+    float preview_width = clutter_actor_get_width(CLUTTER_ACTOR(renderer->speaker_preview_bar));
+    clutter_actor_set_position (renderer->speaker_notes,
+  		  	  	  	  	  	  (preview_width+20.0),
+  		  	  	  	  	  	  //clutter_actor_get_width(renderer->speaker_preview_bar)+20.0,
+                                (20.0+clutter_actor_get_height(CLUTTER_ACTOR(renderer->speaker_buttons_group))));
+    clutter_actor_set_width    (renderer->speaker_notes, nw-(preview_width+40.0));
+  }
+  else
+    clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_notes), "");
 out:
   is_updated = TRUE;
 
