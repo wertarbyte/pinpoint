@@ -90,6 +90,8 @@ struct _PinPointPoint
   const char        *text;            /*  the text of the slide */
   ClutterGravity     position;
   const char        *font;
+  const char        *notes_font;
+  const char        *notes_font_size;
   PPTextAlign        text_align;
   const char        *text_color;
   gboolean           use_markup;

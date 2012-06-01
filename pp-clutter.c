@@ -665,6 +665,8 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
   renderer->speaker_screen = clutter_stage_new ();
   clutter_stage_set_title(CLUTTER_STAGE(renderer->speaker_screen), "Pinpoint speaker screen");
 
+
+
   renderer->speaker_notes = g_object_new (CLUTTER_TYPE_TEXT,
                                 "x", 10.0,
                                 "y", 0.0,
@@ -2027,12 +2029,30 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
   if (point->speaker_notes) {
     clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_notes),
                            point->speaker_notes);
+    char *spc_text = " ";
     float preview_width = clutter_actor_get_width(CLUTTER_ACTOR(renderer->speaker_preview_bar));
     clutter_actor_set_position (renderer->speaker_notes,
   		  	  	  	  	  	  (preview_width+20.0),
-  		  	  	  	  	  	  //clutter_actor_get_width(renderer->speaker_preview_bar)+20.0,
-                                (20.0+clutter_actor_get_height(CLUTTER_ACTOR(renderer->speaker_buttons_group))));
-    clutter_actor_set_width    (renderer->speaker_notes, nw-(preview_width+40.0));
+                              (20.0+clutter_actor_get_height(CLUTTER_ACTOR(renderer->speaker_buttons_group))));
+
+    clutter_actor_set_width  (renderer->speaker_notes, nw-(preview_width+40.0));
+
+    // handle notes-font-size=auto:
+    float text_scale;
+    if (g_strcmp0(point->notes_font_size, "auto")==0) {
+    	text_scale = (nh-(clutter_actor_get_height(CLUTTER_ACTOR(renderer->speaker_buttons_group))+40.0))/clutter_actor_get_width(renderer->speaker_notes);
+        clutter_text_set_font_name(CLUTTER_TEXT (renderer->speaker_notes),
+        					   g_strconcat(point->notes_font, spc_text, "20px", NULL));
+    } else {
+    	text_scale = 1.0;
+        clutter_text_set_font_name(CLUTTER_TEXT (renderer->speaker_notes),
+        					   g_strconcat(point->notes_font, spc_text, point->notes_font_size, NULL));
+    }
+    g_object_set (renderer->speaker_notes,
+				  "scale-x", text_scale,
+				  "scale-y", text_scale,
+				  NULL);
+    clutter_actor_set_width  (renderer->speaker_notes, nw-(preview_width+40.0));
   }
   else
     clutter_text_set_text (CLUTTER_TEXT (renderer->speaker_notes), "");

@@ -68,6 +68,8 @@ static PinPointPoint pin_default_point = {
   .text = NULL,
   .position = CLUTTER_GRAVITY_CENTER,
   .font = "Sans 60px",
+  .notes_font = "Sans",
+  .notes_font_size = "20px",
   .text_color = "white",
   .text_align = PP_TEXT_LEFT,
   .use_markup = TRUE,
@@ -451,6 +453,8 @@ parse_setting (PinPointPoint *point,
   START_PARSER
   IF_PREFIX("stage-color=") point->stage_color = STRING;
   IF_PREFIX("font=")        point->font = STRING;
+  IF_PREFIX("notes-font=")  point->notes_font = STRING;
+  IF_PREFIX("notes-font-size=")  point->notes_font_size = STRING;
   IF_PREFIX("text-color=")  point->text_color = STRING;
   IF_PREFIX("text-align=")  ENUM(point->text_align, PPTextAlign, STRING);
   IF_PREFIX("shading-color=") point->shading_color = STRING;
