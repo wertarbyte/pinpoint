@@ -796,15 +796,20 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
 
   opacity_hover(renderer->speaker_fullscreen);
 
-  clutter_container_add (CLUTTER_CONTAINER (renderer->speaker_buttons_group),
-		  	  	  	  	 renderer->speaker_buttonbar,
-                         renderer->speaker_speakerscreen,
-                         renderer->speaker_start,
-                         renderer->speaker_pause,
-                         renderer->speaker_autoadvance,
-                         renderer->speaker_rehearse,
-                         renderer->speaker_fullscreen,
-                         NULL);
+  clutter_actor_add_child (renderer->speaker_buttons_group,
+                           renderer->speaker_buttonbar);
+  clutter_actor_add_child (renderer->speaker_buttons_group,
+                           renderer->speaker_speakerscreen);
+  clutter_actor_add_child (renderer->speaker_buttons_group,
+                           renderer->speaker_start);
+  clutter_actor_add_child (renderer->speaker_buttons_group,
+                           renderer->speaker_pause);
+  clutter_actor_add_child (renderer->speaker_buttons_group,
+                           renderer->speaker_autoadvance);
+  clutter_actor_add_child (renderer->speaker_buttons_group,
+                           renderer->speaker_rehearse);
+  clutter_actor_add_child (renderer->speaker_buttons_group,
+                           renderer->speaker_fullscreen);
 
   g_signal_connect (renderer->speaker_screen, "key-press-event",
                     G_CALLBACK (key_pressed), renderer);
@@ -838,24 +843,30 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
   renderer->speaker_current = clutter_cairo_texture_new (PREVIEW_WIDTH-1, PREVIEW_HEIGHT-1);
   renderer->speaker_next = clutter_cairo_texture_new (PREVIEW_WIDTH-1, PREVIEW_HEIGHT-1);
 
-  clutter_container_add (CLUTTER_CONTAINER (renderer->speaker_screen),
-		  	  	  	  	 renderer->speaker_preview_bar,
-                         renderer->speaker_prev,
-                         renderer->speaker_current,
-                         renderer->speaker_next,
-                         renderer->speaker_notes,
-                         renderer->speaker_prog_bg,
-                         renderer->speaker_slide_prog_warning,
-                         renderer->speaker_prog_time,
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_preview_bar);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_prev);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_current);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_next);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_notes);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_prog_bg);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_slide_prog_warning);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_prog_time);
 
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_prog_slide);
 
-                         renderer->speaker_prog_slide,
-
-
-                         renderer->speaker_buttons_group,
-                         renderer->speaker_time_remaining,
-                         NULL);
-
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_buttons_group);
+  clutter_actor_add_child (renderer->speaker_screen,
+                           renderer->speaker_time_remaining);
 
 
   clutter_actor_set_opacity (renderer->speaker_slide_prog_warning, 0);
@@ -925,21 +936,17 @@ clutter_renderer_init (PinPointRenderer   *pp_renderer,
   clutter_actor_set_opacity (renderer->shading, 0x77);
   clutter_actor_set_opacity (renderer->commandline_shading, 0x77);
 
-  clutter_container_add_actor (CLUTTER_CONTAINER (renderer->midground),
-                               renderer->shading);
+  clutter_actor_add_child (renderer->midground, renderer->shading);
 
-  clutter_container_add (CLUTTER_CONTAINER (renderer->stage),
-                         renderer->root,
-                         renderer->curtain,
-                         NULL);
-  clutter_container_add (CLUTTER_CONTAINER (renderer->root),
-                         renderer->background,
-                         renderer->midground,
-                         renderer->foreground,
-                         renderer->json_layer,
-                         renderer->commandline_shading,
-                         renderer->commandline,
-                         NULL);
+  clutter_actor_add_child (renderer->stage, renderer->root);
+  clutter_actor_add_child (renderer->stage, renderer->curtain);
+
+  clutter_actor_add_child (renderer->root, renderer->background);
+  clutter_actor_add_child (renderer->root, renderer->midground);
+  clutter_actor_add_child (renderer->root, renderer->foreground);
+  clutter_actor_add_child (renderer->root, renderer->json_layer);
+  clutter_actor_add_child (renderer->root, renderer->commandline_shading);
+  clutter_actor_add_child (renderer->root, renderer->commandline);
 
   renderer->timer_paused = FALSE;
   renderer->timer = g_timer_new ();
@@ -1063,7 +1070,7 @@ _clutter_get_texture (ClutterRenderer *renderer,
   if (!source)
     return NULL;
 
-  clutter_container_add_actor (CLUTTER_CONTAINER (renderer->stage), source);
+  clutter_actor_add_child (renderer->stage, source);
   clutter_actor_hide (source);
 
   g_hash_table_insert (renderer->bg_cache, (char *) g_strdup (file), source);
@@ -1268,8 +1275,7 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
         pp_super_aa_set_resolution (PP_SUPER_AA (aa), 2, 2);
         svg = dax_actor_new_from_file (file, &error);
         mx_offscreen_set_pick_child (MX_OFFSCREEN (aa), TRUE);
-        clutter_container_add_actor (CLUTTER_CONTAINER (aa),
-                                     svg);
+        clutter_actor_add_child (aa, svg);
 
         data->background = aa;
 
@@ -1291,8 +1297,7 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
 
   if (data->background)
     {
-      clutter_container_add_actor (CLUTTER_CONTAINER (renderer->background),
-                                   data->background);
+      clutter_actor_add_child (renderer->background, data->background);
       clutter_actor_set_opacity (data->background, 0);
     }
 
@@ -1318,8 +1323,7 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
                                  NULL);
     }
 
-  clutter_container_add_actor (CLUTTER_CONTAINER (renderer->foreground),
-                               data->text);
+  clutter_actor_add_child (renderer->foreground, data->text);
 
   clutter_actor_set_position (data->text, RESTX, renderer->rest_y);
   data->rest_y = renderer->rest_y;
@@ -2245,8 +2249,7 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
           data->json_slide = CLUTTER_ACTOR (
               clutter_script_get_object (data->script, "actor"));
 
-          clutter_container_add_actor (CLUTTER_CONTAINER (renderer->json_layer),
-                                       data->json_slide);
+          clutter_actor_add_child (renderer->json_layer, data->json_slide);
           g_signal_connect (data->state, "completed",
                             G_CALLBACK (state_completed), point);
           clutter_state_warp_to_state (data->state, "pre");
@@ -2320,8 +2323,7 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
              {
                data->shading = clutter_rectangle_new_with_color (&black);
 
-               clutter_container_add_actor (
-                   CLUTTER_CONTAINER (data->midground), data->shading);
+               clutter_actor_add_child (data->midground, data->shading);
                clutter_actor_set_size (data->midground,
                                     clutter_actor_get_width (renderer->stage),
                                     clutter_actor_get_height (renderer->stage));
