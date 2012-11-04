@@ -836,8 +836,8 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
   renderer->speaker_prog_slide = pp_rectangle_new_with_color (&c_prog_slide);
   renderer->speaker_slide_prog_warning = pp_rectangle_new_with_color (&red);
 
-  clutter_stage_set_color (CLUTTER_STAGE (renderer->speaker_screen), &black);
-  clutter_stage_set_color (CLUTTER_STAGE (renderer->speaker_screen), &black);
+  clutter_actor_set_background_color (renderer->speaker_screen, &black);
+  clutter_actor_set_background_color (renderer->speaker_screen, &black);
   clutter_stage_set_user_resizable (CLUTTER_STAGE (renderer->speaker_screen), TRUE);
 
 
@@ -962,7 +962,7 @@ clutter_renderer_init (PinPointRenderer   *pp_renderer,
   clutter_actor_show (stage);
 
 
-  clutter_stage_set_color (CLUTTER_STAGE (stage), &black);
+  clutter_actor_set_background_color (stage, &black);
   g_signal_connect (stage, "delete-event",
                     G_CALLBACK (stage_deleted), renderer);
   g_signal_connect (stage, "key-press-event",
@@ -2103,7 +2103,7 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
   if (point->stage_color)
     {
       clutter_color_from_string (&color, point->stage_color);
-      clutter_stage_set_color (CLUTTER_STAGE (renderer->stage), &color);
+      clutter_actor_set_background_color (renderer->stage, &color);
     }
 
   if (data->background)
