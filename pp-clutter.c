@@ -211,6 +211,27 @@ static gboolean mouse_clicked  (ClutterActor    *actor,
                                 ClutterRenderer *renderer);
 
 static void
+pp_actor_animate (ClutterActor         *actor,
+                   ClutterAnimationMode  mode,
+                   guint                 duration,
+                   const gchar          *first_property,
+                   ...)
+{
+  va_list args;
+
+  clutter_actor_save_easing_state (actor);
+  clutter_actor_set_easing_mode (actor, mode);
+  clutter_actor_set_easing_duration (actor, duration);
+
+  va_start (args, first_property);
+  g_object_set_valist (G_OBJECT (actor), first_property, args);
+  va_end (args);
+
+  clutter_actor_restore_easing_state (actor);
+}
+
+
+static void
 pp_clutter_render_adjust_background (ClutterRenderer *renderer,
                                      PinPointPoint   *point)
 {
@@ -367,15 +388,12 @@ activate_commandline (ClutterRenderer *renderer)
 
   point = pp_slidep->data;
 
-  clutter_actor_animate (renderer->commandline,
-                         CLUTTER_LINEAR, 500,
-                         "opacity",      0xff,
-                         NULL);
+  pp_actor_animate (renderer->commandline, CLUTTER_LINEAR, 500,
+                     "opacity", 0xff, NULL);
 
-  clutter_actor_animate (renderer->commandline_shading,
-                         CLUTTER_LINEAR, 100,
-                         "opacity",     (int)(point->shading_opacity*0xff*0.33),
-                         NULL);
+  pp_actor_animate (renderer->commandline_shading, CLUTTER_LINEAR, 100,
+                    "opacity", (int)(point->shading_opacity*0xff*0.33),
+                    NULL);
 
   g_object_set (renderer->commandline,
                 "editable", TRUE,
@@ -398,13 +416,13 @@ static gboolean commandline_cancel_cb (ClutterActor *actor,
        clutter_event_get_key_symbol (event) == CLUTTER_Tab))
     {
       clutter_actor_grab_key_focus (renderer->stage);
-      clutter_actor_animate (renderer->commandline,
-                             CLUTTER_LINEAR, 500,
-                             "opacity", (int)(0xff*0.33), NULL);
+      pp_actor_animate (renderer->commandline,
+                        CLUTTER_LINEAR, 500,
+                        "opacity", (int)(0xff*0.33), NULL);
       g_object_set (renderer->commandline, "editable", FALSE, NULL);
-      clutter_actor_animate (renderer->commandline_shading,
-                             CLUTTER_LINEAR, 500,
-                             "opacity", (int)(point->shading_opacity*0xff*0.33), NULL);
+      pp_actor_animate (renderer->commandline_shading,
+                        CLUTTER_LINEAR, 500,
+                        "opacity", (int)(point->shading_opacity*0xff*0.33), NULL);
       return TRUE;
     }
   update_commandline_shading (renderer);
@@ -417,13 +435,13 @@ static gboolean commandline_action_cb (ClutterActor *actor,
   ClutterRenderer *renderer = CLUTTER_RENDERER (data);
   PinPointPoint *point = pp_slidep->data;
   clutter_actor_grab_key_focus (renderer->stage);
-  clutter_actor_animate (renderer->commandline,
-                         CLUTTER_LINEAR, 500,
-                         "opacity", (int)(0xff*0.33), NULL);
+  pp_actor_animate (renderer->commandline,
+                    CLUTTER_LINEAR, 500,
+                    "opacity", (int)(0xff*0.33), NULL);
   g_object_set (renderer->commandline, "editable", FALSE, NULL);
-  clutter_actor_animate (renderer->commandline_shading,
-                         CLUTTER_LINEAR, 500,
-                         "opacity", (int)(point->shading_opacity*0xff*0.33), NULL);
+  pp_actor_animate (renderer->commandline_shading,
+                    CLUTTER_LINEAR, 500,
+                    "opacity", (int)(point->shading_opacity*0xff*0.33), NULL);
 
   action_slide (renderer);
   return FALSE;
@@ -487,9 +505,9 @@ opacity_hover_enter (ClutterActor *actor,
                      ClutterEvent *event,
                      gpointer      data)
 {
-  clutter_actor_animate (actor, CLUTTER_LINEAR, 200,
-                         "opacity", HOVER_OPACITY,
-                         NULL);
+  pp_actor_animate (actor, CLUTTER_LINEAR, 200,
+                    "opacity", HOVER_OPACITY,
+                    NULL);
   return FALSE;
 }
 
@@ -499,9 +517,9 @@ opacity_hover_leave (ClutterActor *actor,
                      ClutterEvent *event,
                      gpointer      data)
 {
-  clutter_actor_animate (actor, CLUTTER_LINEAR, 200,
-                         "opacity", NORMAL_OPACITY,
-                         NULL);
+  pp_actor_animate (actor, CLUTTER_LINEAR, 200,
+                    "opacity", NORMAL_OPACITY,
+                    NULL);
   return FALSE;
 }
 
@@ -1537,20 +1555,20 @@ static void leave_slide (ClutterRenderer *renderer,
 
   if (!point->transition)
     {
-      clutter_actor_animate (data->text,
-                             CLUTTER_LINEAR, 2000,
-                             "depth",        RESTDEPTH,
-                             "scale-x",      1.0,
-                             "scale-y",      1.0,
-                             "x",            RESTX,
-                             "y",            data->rest_y,
-                             NULL);
+      pp_actor_animate (data->text,
+                        CLUTTER_LINEAR, 2000,
+                        "depth",        RESTDEPTH,
+                        "scale-x",      1.0,
+                        "scale-y",      1.0,
+                        "x",            RESTX,
+                        "y",            data->rest_y,
+                        NULL);
       if (data->background)
         {
-          clutter_actor_animate (data->background,
-                                 CLUTTER_LINEAR, 1000,
-                                 "opacity",      0x0,
-                                 NULL);
+          pp_actor_animate (data->background,
+                            CLUTTER_LINEAR, 1000,
+                            "opacity",      0x0,
+                            NULL);
         }
     }
   else
@@ -1687,16 +1705,16 @@ static void update_commandline_shading (ClutterRenderer *renderer)
          NULL);
   command = clutter_text_get_text (CLUTTER_TEXT (renderer->commandline));
 
-  clutter_actor_animate (renderer->commandline_shading,
-       CLUTTER_EASE_OUT_QUINT, 1000,
+  pp_actor_animate (renderer->commandline_shading,
+                    CLUTTER_EASE_OUT_QUINT, 1000,
 
-       /* the opacity of the commandline shading depends on whether we
-          have a command or not */
-       "opacity", command && *command?(int)(point->shading_opacity*255*0.33):0,
-       "color",   &color,
-       "width",   shading_width,
-       "height",  shading_height,
-       NULL);
+                     /* the opacity of the commandline shading depends
+                        on whether we have a command or not */
+                     "opacity", command && *command?(int)(point->shading_opacity*255*0.33):0,
+                     "color",   &color,
+                     "width",   shading_width,
+                     "height",  shading_height,
+                     NULL);
 }
 
 static gfloat point_time (ClutterRenderer *renderer,
@@ -1826,28 +1844,28 @@ static gboolean update_speaker_screen (ClutterRenderer *renderer)
 
 
           if (renderer->speaker_slide_prog_warning)
-            clutter_actor_animate (renderer->speaker_slide_prog_warning,
-                                   CLUTTER_LINEAR, 500,
-                                   "opacity", OPACITY_OVER_TIME,
-                                   NULL);
+            pp_actor_animate (renderer->speaker_slide_prog_warning,
+                              CLUTTER_LINEAR, 500,
+                              "opacity", OPACITY_OVER_TIME,
+                              NULL);
         }
 
 
       else if ((current_slide_duration - current_slide_time < warn_time))
         {
           if (renderer->speaker_slide_prog_warning)
-            clutter_actor_animate (renderer->speaker_slide_prog_warning,
-                                   CLUTTER_LINEAR, 500,
-                                   "opacity", OPACITY_PAST_THRESHOLD,
-                                   NULL);
+            pp_actor_animate (renderer->speaker_slide_prog_warning,
+                              CLUTTER_LINEAR, 500,
+                              "opacity", OPACITY_PAST_THRESHOLD,
+                              NULL);
         }
       else
         {
           if (renderer->speaker_slide_prog_warning)
-            clutter_actor_animate (renderer->speaker_slide_prog_warning,
-                                   CLUTTER_LINEAR, 50,
-                                   "opacity", OPACITY_OK,
-                                   NULL);
+            pp_actor_animate (renderer->speaker_slide_prog_warning,
+                              CLUTTER_LINEAR, 50,
+                              "opacity", OPACITY_OK,
+                              NULL);
         }
 
       current_slide_prev_time = g_timer_elapsed (renderer->timer, NULL);
@@ -2119,18 +2137,18 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
 
   if (!point->transition)
     {
-      clutter_actor_animate (renderer->foreground,
-                             CLUTTER_LINEAR, 500,
-                             "opacity",      255,
-                             NULL);
-      clutter_actor_animate (renderer->midground,
-                             CLUTTER_LINEAR, 500,
-                             "opacity",      255,
-                             NULL);
-      clutter_actor_animate (renderer->background,
-                             CLUTTER_LINEAR, 500,
-                             "opacity",      255,
-                             NULL);
+      pp_actor_animate (renderer->foreground,
+                         CLUTTER_LINEAR, 500,
+                         "opacity",      255,
+                         NULL);
+      pp_actor_animate (renderer->midground,
+                         CLUTTER_LINEAR, 500,
+                         "opacity",      255,
+                         NULL);
+      pp_actor_animate (renderer->background,
+                         CLUTTER_LINEAR, 500,
+                         "opacity",      255,
+                         NULL);
 
       if (point->text && *point->text)
         {
@@ -2158,58 +2176,58 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
 
          clutter_color_from_string (&color, point->shading_color);
 
-         clutter_actor_animate (data->text,
-                                CLUTTER_EASE_OUT_QUINT, 1000,
-                                "depth",   0.0,
-                                "scale-x", text_scale,
-                                "scale-y", text_scale,
-                                "x",       text_x,
-                                "y",       text_y,
-                                NULL);
+         pp_actor_animate (data->text,
+                            CLUTTER_EASE_OUT_QUINT, 1000,
+                            "depth",   0.0,
+                            "scale-x", text_scale,
+                            "scale-y", text_scale,
+                            "x",       text_x,
+                            "y",       text_y,
+                            NULL);
 
-         clutter_actor_animate (renderer->shading,
-                CLUTTER_EASE_OUT_QUINT, 1000,
-                "x",       shading_x,
-                "y",       shading_y,
-                "opacity", (int)(point->shading_opacity*255),
-                "color",   &color,
-                "width",   shading_width,
-                "height",  shading_height,
-                NULL);
+         pp_actor_animate (renderer->shading,
+                            CLUTTER_EASE_OUT_QUINT, 1000,
+                            "x",       shading_x,
+                            "y",       shading_y,
+                            "opacity", (int)(point->shading_opacity*255),
+                            "color",   &color,
+                            "width",   shading_width,
+                            "height",  shading_height,
+                            NULL);
         }
       else
         {
-          clutter_actor_animate (renderer->shading,
-                 CLUTTER_LINEAR, 500,
-                 "opacity", 0,
-                 "width",   0.0,
-                 "height",  0.0,
-                 NULL);
+          pp_actor_animate (renderer->shading,
+                             CLUTTER_LINEAR, 500,
+                             "opacity", 0,
+                             "width",   0.0,
+                             "height",  0.0,
+                             NULL);
         }
 
 
       if (data->background)
-         clutter_actor_animate (data->background,
-                                CLUTTER_LINEAR, 1000,
-                                "opacity", 0xff,
-                                NULL);
+        pp_actor_animate (data->background,
+                           CLUTTER_LINEAR, 1000,
+                           "opacity", 0xff,
+                           NULL);
     }
   else
     {
       GError *error = NULL;
       /* fade out global group of texts when using a custom .json template */
-      clutter_actor_animate (renderer->foreground,
-                             CLUTTER_LINEAR, 500,
-                             "opacity",      0,
-                             NULL);
-      clutter_actor_animate (renderer->midground,
-                             CLUTTER_LINEAR, 500,
-                             "opacity",      0,
-                             NULL);
-      clutter_actor_animate (renderer->background,
-                             CLUTTER_LINEAR, 500,
-                             "opacity",      0,
-                             NULL);
+      pp_actor_animate (renderer->foreground,
+                         CLUTTER_LINEAR, 500,
+                         "opacity",      0,
+                         NULL);
+      pp_actor_animate (renderer->midground,
+                         CLUTTER_LINEAR, 500,
+                         "opacity",      0,
+                         NULL);
+      pp_actor_animate (renderer->background,
+                         CLUTTER_LINEAR, 500,
+                         "opacity",      0,
+                         NULL);
       if (!data->script)
         {
           char *path = pp_lookup_transition (point->transition);
@@ -2365,10 +2383,10 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
                  "x", text_x,
                  "y", text_y,
                  NULL);
-   clutter_actor_animate (renderer->commandline,
-          CLUTTER_EASE_OUT_QUINT, 1000,
-          "opacity", point->command?(gint)(0xff*0.33):0,
-          NULL);
+   pp_actor_animate (renderer->commandline,
+                     CLUTTER_EASE_OUT_QUINT, 1000,
+                     "opacity", point->command?(gint)(0xff*0.33):0,
+                     NULL);
 
    update_commandline_shading (renderer);
   }
