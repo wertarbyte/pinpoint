@@ -703,7 +703,7 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
                                 "color",       &white,
                                 NULL);
 
-  renderer->speaker_buttons_group = clutter_group_new ();
+  renderer->speaker_buttons_group = clutter_actor_new ();
 
 
 #define BUTTON_FONT "Sans 16px"
@@ -911,13 +911,13 @@ clutter_renderer_init (PinPointRenderer   *pp_renderer,
 
   renderer->stage = stage = clutter_stage_new ();
   clutter_stage_set_title(CLUTTER_STAGE(stage), "Pinpoint presentation");
-  renderer->root = clutter_group_new ();
+  renderer->root = clutter_actor_new ();
   renderer->curtain = clutter_rectangle_new_with_color (&black);
   renderer->rest_y = STARTPOS;
-  renderer->background = clutter_group_new ();
-  renderer->midground = clutter_group_new ();
-  renderer->foreground = clutter_group_new ();
-  renderer->json_layer = clutter_group_new ();
+  renderer->background = clutter_actor_new ();
+  renderer->midground = clutter_actor_new ();
+  renderer->foreground = clutter_actor_new ();
+  renderer->json_layer = clutter_actor_new ();
   renderer->shading = clutter_rectangle_new_with_color (&black);
   renderer->commandline_shading = clutter_rectangle_new_with_color (&black);
   renderer->commandline = clutter_text_new ();
