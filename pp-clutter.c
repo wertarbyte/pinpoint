@@ -1163,7 +1163,8 @@ setup_camera (PinPointRenderer *renderer,
     }
 
   capsfilter = gst_element_factory_make ("capsfilter", NULL);
-  sink = clutter_gst_video_sink_new (CLUTTER_TEXTURE (texture));
+  sink = g_object_new (CLUTTER_GST_TYPE_VIDEO_SINK,
+                       "texture", texture, NULL);
 
   /* make videotestsrc spit the format we want */
   caps = gst_caps_new_simple ("video/x-raw-yuv", NULL);
