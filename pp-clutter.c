@@ -230,6 +230,15 @@ pp_actor_animate (ClutterActor         *actor,
   clutter_actor_restore_easing_state (actor);
 }
 
+static ClutterActor *
+pp_rectangle_new_with_color (const ClutterColor *color)
+{
+  ClutterActor *actor = clutter_actor_new ();
+
+  clutter_actor_set_background_color (actor, color);
+
+  return actor;
+}
 
 static void
 pp_clutter_render_adjust_background (ClutterRenderer *renderer,
@@ -237,11 +246,16 @@ pp_clutter_render_adjust_background (ClutterRenderer *renderer,
 {
   float bg_x, bg_y, bg_width, bg_height, bg_scale_x, bg_scale_y;
   ClutterPointData *data = point->data;
+  gboolean background_color_set;
 
   if (!data)
     return;
 
-  if (CLUTTER_IS_RECTANGLE (data->background))
+  g_object_get (G_OBJECT (data->background),
+                "background-color-set", &background_color_set,
+                NULL);
+
+  if (background_color_set)
     {
       clutter_actor_get_size (renderer->stage, &bg_width, &bg_height);
       clutter_actor_set_size (data->background, bg_width, bg_height);
@@ -762,15 +776,10 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
                                 "color",       &black,
                                 NULL);
 
-  renderer->speaker_buttonbar = g_object_new(CLUTTER_TYPE_RECTANGLE,
-		  	  	  	  	  	    "x",		   0.0,
-		  	  	  	  	  	    "y",		   0.0,
-		  	  	  	  	  	    "opacity",	   255,
-		  	  	  	  	  	    "color",	   &gray,
-		  	  	  	  	  	  	NULL);
+  renderer->speaker_buttonbar = pp_rectangle_new_with_color (&gray);
 
   clutter_actor_set_height(renderer->speaker_buttonbar,
-		  	  	  	  	  	  clutter_actor_get_height(renderer->speaker_pause)*1.1);
+                           clutter_actor_get_height(renderer->speaker_pause)*1.1);
 
 
   opacity_hover(renderer->speaker_speakerscreen);
@@ -822,22 +831,17 @@ clutter_renderer_init_speaker_screen (ClutterRenderer *renderer)
   renderer->timer = g_timer_new ();
   g_timer_stop (renderer->timer);
 
-  renderer->speaker_prog_bg = clutter_rectangle_new_with_color (&c_prog_bg);
-  renderer->speaker_prog_time = clutter_rectangle_new_with_color (&c_prog_time);
-  renderer->speaker_prog_slide = clutter_rectangle_new_with_color (&c_prog_slide);
-  renderer->speaker_slide_prog_warning = clutter_rectangle_new_with_color (&red);
+  renderer->speaker_prog_bg = pp_rectangle_new_with_color (&c_prog_bg);
+  renderer->speaker_prog_time = pp_rectangle_new_with_color (&c_prog_time);
+  renderer->speaker_prog_slide = pp_rectangle_new_with_color (&c_prog_slide);
+  renderer->speaker_slide_prog_warning = pp_rectangle_new_with_color (&red);
 
   clutter_stage_set_color (CLUTTER_STAGE (renderer->speaker_screen), &black);
   clutter_stage_set_color (CLUTTER_STAGE (renderer->speaker_screen), &black);
   clutter_stage_set_user_resizable (CLUTTER_STAGE (renderer->speaker_screen), TRUE);
 
 
-  renderer->speaker_preview_bar = g_object_new(CLUTTER_TYPE_RECTANGLE,
-		  	  	  	  	  	  	  	  	  	  	  "x", 				0.0,
-		  	  	  	  	  	  	  	  	  	  	  "y",				0.0,
-		  	  	  	  	  	  	  	  	  	  	  "opacity",		255,
-		  	  	  	  	  	  	  	  	  	  	  "color",			&lightgray,
-		  	  	  	  	  	  	  	  	  	  	  NULL);
+  renderer->speaker_preview_bar = pp_rectangle_new_with_color (&lightgray);
 
   renderer->speaker_prev = clutter_cairo_texture_new (PREVIEW_WIDTH-1, PREVIEW_HEIGHT-1);
   renderer->speaker_current = clutter_cairo_texture_new (PREVIEW_WIDTH-1, PREVIEW_HEIGHT-1);
@@ -912,14 +916,14 @@ clutter_renderer_init (PinPointRenderer   *pp_renderer,
   renderer->stage = stage = clutter_stage_new ();
   clutter_stage_set_title(CLUTTER_STAGE(stage), "Pinpoint presentation");
   renderer->root = clutter_actor_new ();
-  renderer->curtain = clutter_rectangle_new_with_color (&black);
+  renderer->curtain = pp_rectangle_new_with_color (&black);
   renderer->rest_y = STARTPOS;
   renderer->background = clutter_actor_new ();
   renderer->midground = clutter_actor_new ();
   renderer->foreground = clutter_actor_new ();
   renderer->json_layer = clutter_actor_new ();
-  renderer->shading = clutter_rectangle_new_with_color (&black);
-  renderer->commandline_shading = clutter_rectangle_new_with_color (&black);
+  renderer->shading = pp_rectangle_new_with_color (&black);
+  renderer->commandline_shading = pp_rectangle_new_with_color (&black);
   renderer->commandline = clutter_text_new ();
 
   /* Clutter doesn't seem to have a good way to infer which backend it
@@ -1220,11 +1224,10 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
       {
         ret = clutter_color_from_string (&color, point->bg);
         if (ret)
-          data->background = g_object_new (CLUTTER_TYPE_RECTANGLE,
-                                           "color",  &color,
-                                           "width",  100.0,
-                                           "height", 100.0,
-                                           NULL);
+          {
+            data->background = pp_rectangle_new_with_color (&color);
+            clutter_actor_set_size (data->background, 100.0, 100.0);
+          }
       }
       break;
     case PP_BG_NONE:
@@ -1233,18 +1236,16 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
 
         ret = clutter_color_from_string (&color, point->stage_color);
         if (ret)
-          data->background = g_object_new (CLUTTER_TYPE_RECTANGLE,
-                                           "color",  &color,
-                                           "width",  100.0,
-                                           "height", 100.0,
-                                           NULL);
+          {
+            data->background = pp_rectangle_new_with_color (&color);
+            clutter_actor_set_size (data->background, 100.0, 100.0);
+          }
         else
-          data->background = g_object_new (CLUTTER_TYPE_RECTANGLE,
-                                           "color",  &black,
-                                           "width",  100.0,
-                                           "height", 100.0,
-                                           NULL);
-      }
+          {
+            data->background = pp_rectangle_new_with_color (&black);
+            clutter_actor_set_size (data->background, 100.0, 100.0);
+          }
+     }
       break;
     case PP_BG_IMAGE:
       data->background = _clutter_get_texture (renderer, file);
@@ -1715,7 +1716,7 @@ static void update_commandline_shading (ClutterRenderer *renderer)
                      /* the opacity of the commandline shading depends
                         on whether we have a command or not */
                      "opacity", command && *command?(int)(point->shading_opacity*255*0.33):0,
-                     "color",   &color,
+                     "background-color",   &color,
                      "width",   shading_width,
                      "height",  shading_height,
                      NULL);
@@ -2191,12 +2192,12 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
 
          pp_actor_animate (renderer->shading,
                             CLUTTER_EASE_OUT_QUINT, 1000,
-                            "x",       shading_x,
-                            "y",       shading_y,
-                            "opacity", (int)(point->shading_opacity*255),
-                            "color",   &color,
-                            "width",   shading_width,
-                            "height",  shading_height,
+                            "x",                shading_x,
+                            "y",                shading_y,
+                            "opacity",          (int)(point->shading_opacity*255),
+                            "background-color", &color,
+                            "width",            shading_width,
+                            "height",           shading_height,
                             NULL);
         }
       else
@@ -2321,7 +2322,7 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
 
            if (!data->shading)
              {
-               data->shading = clutter_rectangle_new_with_color (&black);
+               data->shading = pp_rectangle_new_with_color (&black);
 
                clutter_actor_add_child (data->midground, data->shading);
                clutter_actor_set_size (data->midground,
@@ -2330,14 +2331,14 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
              }
 
            g_object_set (data->shading,
-                  "depth",  -0.01,
-                  "x",      shading_x,
-                  "y",      shading_y,
-                  "opacity", (int)(point->shading_opacity*255),
-                  "color",  &color,
-                  "width",  shading_width,
-                  "height", shading_height,
-                  NULL);
+                         "depth",            -0.01,
+                         "x",                shading_x,
+                         "y",                shading_y,
+                         "opacity",          (int)(point->shading_opacity*255),
+                         "background-color", &color,
+                         "width",            shading_width,
+                         "height",           shading_height,
+                         NULL);
          }
        else /* no text, fade out shading */
          if (data->shading)
