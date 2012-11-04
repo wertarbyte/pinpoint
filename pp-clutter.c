@@ -241,6 +241,17 @@ pp_rectangle_new_with_color (const ClutterColor *color)
 }
 
 static void
+pp_actor_reparent (ClutterActor *actor, ClutterActor *new_parent)
+{
+  g_object_ref (actor);
+
+  clutter_actor_remove_child (clutter_actor_get_parent (actor), actor);
+  clutter_actor_add_child (new_parent, actor);
+
+  g_object_unref (actor);
+}
+
+static void
 pp_clutter_render_adjust_background (ClutterRenderer *renderer,
                                      PinPointPoint   *point)
 {
@@ -1628,7 +1639,8 @@ static void state_completed (ClutterState *state, gpointer user_data)
       clutter_actor_hide (data->json_slide);
       if (data->background2)
         {
-          clutter_actor_reparent (data->text, CLUTTER_RENDERER (data->renderer)->foreground);
+          pp_actor_reparent (data->text,
+                             CLUTTER_RENDERER (data->renderer)->foreground);
 
           g_object_set (data->text,
                         "depth",   RESTDEPTH,
@@ -2257,7 +2269,7 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
 
           if (data->background2) /* parmanently steal background */
             {
-              clutter_actor_reparent (data->background, data->background2);
+              pp_actor_reparent (data->background, data->background2);
             }
         }
 
@@ -2282,7 +2294,7 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
 
       if (data->foreground)
         {
-          clutter_actor_reparent (data->text, data->foreground);
+          pp_actor_reparent (data->text, data->foreground);
         }
 
       clutter_actor_set_opacity (data->background, 255);
@@ -2345,12 +2357,14 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
            g_object_set (data->shading, "opacity", 0, NULL);
        if (data->foreground)
          {
-           clutter_actor_reparent (data->text, data->foreground);
+           pp_actor_reparent (data->text, data->foreground);
          }
       }
 
       if (!backwards)
-        clutter_actor_raise_top (data->json_slide);
+        clutter_actor_set_child_below_sibling (clutter_actor_get_parent (data->json_slide),
+                                               data->json_slide,
+                                               NULL);
 
       clutter_actor_show (data->json_slide);
       clutter_state_set_state (data->state, "show");
