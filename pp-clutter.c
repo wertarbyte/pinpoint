@@ -1340,7 +1340,7 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
   clutter_actor_set_position (data->text, RESTX, renderer->rest_y);
   data->rest_y = renderer->rest_y;
   renderer->rest_y += clutter_actor_get_height (data->text);
-  clutter_actor_set_depth (data->text, RESTDEPTH);
+  clutter_actor_set_z_position (data->text, RESTDEPTH);
 
   return ret;
 }
