@@ -502,6 +502,7 @@ static gboolean stage_motion (ClutterActor *actor,
 
   clutter_actor_get_size (CLUTTER_RENDERER (renderer)->stage,
                           &stage_width, &stage_height);
+#if 0
 #ifdef QUICK_ACCESS_LEFT
   if (event->motion.x < 8)
     {
@@ -518,6 +519,7 @@ static gboolean stage_motion (ClutterActor *actor,
       pp_slidep = g_list_nth (pp_slides, g_list_length (pp_slides) * d);
       show_slide (renderer, FALSE);
     }
+#endif
 
   return FALSE;
 }
