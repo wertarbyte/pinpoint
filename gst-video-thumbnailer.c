@@ -224,8 +224,10 @@ gst_video_thumbnailer_get_shot (const gchar  *location,
             if (duration > 0) {
                 if (duration / (3 * GST_SECOND) > 90) {
                     seekpos = (rand () % (duration / (3 * GST_SECOND))) * GST_SECOND;
-                } else {
+                } else if (duration > GST_SECOND) {
                     seekpos = (rand () % (duration / (GST_SECOND))) * GST_SECOND;
+                } else {
+                    seekpos = duration / 2;
                 }
             } else {
                 seekpos = 5 * GST_SECOND;
