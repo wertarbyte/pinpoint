@@ -85,7 +85,7 @@ AM_CONDITIONAL([HAVE_RSVG], [test "x$have_rsvg" = "xyes"])
 
 # SVG support with Dax
 AC_ARG_ENABLE([dax],
-	      [AS_HELP_STRING([--enabled-dax=@<:no/auto/yes:>@],
+	      [AS_HELP_STRING([--enable-dax=@<:no/auto/yes:>@],
 			      [SVG loading with dax])],,
 			      [enable_dax=auto])
 AC_MSG_CHECKING([for dax])
