@@ -50,6 +50,8 @@ typedef enum
   PP_BG_SVG
 } PPBackgroundType;
 
+#define MAX_CAMERAS 8
+
 typedef enum
 {
   PP_BG_UNSCALED,
@@ -112,6 +114,7 @@ struct _PinPointPoint
 
   gint              camera_framerate;
   PPResolution      camera_resolution;
+  gint              camera_id;
 
   void              *data;            /* the renderer can attach data here */
 };
@@ -121,7 +124,7 @@ extern gboolean  pp_fullscreen;
 extern gboolean  pp_maximized;
 extern gboolean  pp_speakermode;
 extern gboolean  pp_rehearse;
-extern char     *pp_camera_device;
+extern char    **pp_camera_device;
 
 extern GList         *pp_slides;  /* list of slide text */
 extern GList         *pp_slidep;  /* current slide */

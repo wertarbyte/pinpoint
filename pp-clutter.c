@@ -1129,8 +1129,20 @@ setup_camera (PinPointRenderer *renderer,
 {
   /* These are static to be able to share the texture and the pipeline between
    * all the slides using the camera */
-  static ClutterActor *texture = NULL;
-  static GstElement   *pipeline = NULL;
+  static ClutterActor *textures[MAX_CAMERAS]  = {NULL};
+  static GstElement   *pipelines[MAX_CAMERAS] = {NULL};
+
+  int cur_cam = point->camera_id;
+  if (!pp_camera_device || cur_cam >= g_strv_length(pp_camera_device)) {
+    g_print ( "camera-id %d not found on command line, reverting to autodetection.\n", cur_cam );
+    cur_cam = -1;
+  }
+  if (cur_cam < 0) {
+    cur_cam = 0;
+  }
+
+  ClutterActor *texture = textures[cur_cam];
+  GstElement   *pipeline = pipelines[cur_cam];
 
   ClutterPointData *data = point->data;
   GstElement       *src;
@@ -1180,7 +1192,10 @@ setup_camera (PinPointRenderer *renderer,
     }
 
   if (pp_camera_device)
-    g_object_set (src, "device", pp_camera_device, NULL);
+    {
+      g_print( "Using camera id %d (%s)\n", cur_cam, pp_camera_device[cur_cam] );
+      g_object_set (src, "device", pp_camera_device[cur_cam], NULL);
+    }
 
 #define W (point->camera_resolution.width)
 #define H (point->camera_resolution.height)
@@ -1606,7 +1621,7 @@ static void leave_slide (ClutterRenderer *renderer,
 #ifdef USE_CLUTTER_GST
       if (point->bg_type == PP_BG_CAMERA)
         {
-          gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
+          gst_element_set_state (data->pipeline, GST_STATE_NULL);
         }
       if (CLUTTER_GST_IS_VIDEO_TEXTURE (data->background))
         {
