@@ -1461,6 +1461,18 @@ pp_inhibit (ClutterRenderer *renderer,
 #endif /* HAVE_CLUTTER_X11 */
 }
 
+static void
+pp_minimize (ClutterStage *stage)
+{
+#if HAVE_CLUTTER_X11
+  Display *xdisplay = clutter_x11_get_default_display ();
+  int      xscreen  = clutter_x11_get_default_screen ();
+  Atom     wm_hints = XInternAtom(xdisplay, "_MOTIF_WM_HINTS", True);
+  Window   xwindow  = clutter_x11_get_stage_window (stage);
+  XIconifyWindow(xdisplay, xwindow, xscreen);
+#endif /* HAVE_CLUTTER_X11 */
+}
+
 static gboolean
 key_pressed (ClutterActor    *actor,
              ClutterEvent    *event,
@@ -1485,6 +1497,9 @@ key_pressed (ClutterActor    *actor,
       case CLUTTER_Q:
       case CLUTTER_q:
         clutter_main_quit ();
+        break;
+      case CLUTTER_m:
+        pp_minimize (CLUTTER_STAGE (renderer->stage));
         break;
       case CLUTTER_F1:
         {
