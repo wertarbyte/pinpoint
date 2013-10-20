@@ -170,6 +170,8 @@ typedef struct
 {
   PinPointRenderer *renderer;
   ClutterActor     *background;
+  char             *bg_file;
+  int              bg_placeholder;
   ClutterActor     *text;
   float rest_y;     /* y coordinate when text is stationary unused */
 
@@ -188,9 +190,14 @@ typedef struct
 
 #define CLUTTER_RENDERER(renderer)  ((ClutterRenderer *) renderer)
 
+static void     _set_placeholder_texture (ClutterTexture *texture);
 
 static void     leave_slide   (ClutterRenderer  *renderer,
                                gboolean          backwards);
+static void     prepare_slide (ClutterRenderer  *renderer,
+                               PinPointPoint    *point);
+static void     abandon_slide (ClutterRenderer  *renderer,
+                               PinPointPoint    *point);
 static void     show_slide    (ClutterRenderer  *renderer,
                                gboolean          backwards);
 static void     action_slide  (ClutterRenderer  *renderer);
@@ -604,6 +611,26 @@ toggle_autoadvance (ClutterActor *actor,
 }
 
 static void end_of_presentation (ClutterRenderer *renderer);
+
+static void
+prepare_neighbour_backgrounds (ClutterRenderer *renderer)
+{
+  int radius = 2;
+  GList *l = NULL;
+  int i = 0;
+  for (l = pp_slidep, i = 0; l; l = l->prev, i++) {
+    if (i < radius)
+      prepare_slide (renderer, l->data);
+    else
+      abandon_slide (renderer, l->data);
+  }
+  for (l = pp_slidep, i = 0; l; l = l->next, i++) {
+    if (i < radius)
+      prepare_slide (renderer, l->data);
+    else
+      abandon_slide (renderer, l->data);
+  }
+}
 
 static void
 next_slide (ClutterRenderer *renderer)
@@ -1067,34 +1094,6 @@ clutter_renderer_finalize (PinPointRenderer *pp_renderer)
   g_clear_object (&renderer->gsm);
 }
 
-static ClutterActor *
-_clutter_get_texture (ClutterRenderer *renderer,
-                      const char      *file)
-{
-  ClutterActor *source;
-
-  source = g_hash_table_lookup (renderer->bg_cache, file);
-  if (source)
-    {
-      return clutter_clone_new (source);
-    }
-
-  source = g_object_new (CLUTTER_TYPE_TEXTURE,
-                         "filename", file,
-                         "load-data-async", TRUE,
-                         NULL);
-
-  if (!source)
-    return NULL;
-
-  clutter_actor_add_child (renderer->stage, source);
-  clutter_actor_hide (source);
-
-  g_hash_table_insert (renderer->bg_cache, (char *) g_strdup (file), source);
-
-  return clutter_clone_new (source);
-}
-
 #if USE_CLUTTER_GST
 static void
 on_size_changed (ClutterActor *texture,
@@ -1231,6 +1230,8 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
 
       file = full_path;
     }
+  data->bg_file = NULL;
+  data->bg_placeholder = 0;
 
   switch (point->bg_type)
     {
@@ -1262,7 +1263,12 @@ clutter_renderer_make_point (PinPointRenderer *pp_renderer,
      }
       break;
     case PP_BG_IMAGE:
-      data->background = _clutter_get_texture (renderer, file);
+      data->background = g_object_new (CLUTTER_TYPE_TEXTURE,
+                         "load-data-async", TRUE,
+                         NULL);
+      _set_placeholder_texture( (ClutterTexture*) data->background );
+      data->bg_file = strdup(file);
+      data->bg_placeholder = 1;
       ret = TRUE;
       break;
     case PP_BG_VIDEO:
@@ -1627,6 +1633,57 @@ static void leave_slide (ClutterRenderer *renderer,
           dax_actor_set_playing (DAX_ACTOR (actor), FALSE);
         }
 #endif
+    }
+}
+
+static void prepare_slide (ClutterRenderer *renderer,
+                           PinPointPoint   *point)
+{
+  ClutterPointData *data      = point->data;
+  if (data->background)
+    {
+      if (point->bg_type == PP_BG_IMAGE && data->bg_placeholder)
+        {
+          GError *error = NULL;
+          gboolean succ = clutter_texture_set_from_file( (ClutterTexture*) data->background, data->bg_file, &error);
+          data->bg_placeholder = 0;
+          if (!succ)
+            g_warning ("failed to load background texture '%s': %s\n", data->bg_file, error?error->message:"");
+        }
+    }
+}
+
+static void _set_placeholder_texture (ClutterTexture *texture)
+{
+  GError *error = NULL;
+  guchar data[4] = {0};
+  gboolean succ = clutter_texture_set_from_rgb_data(
+    texture,
+    data,
+    TRUE,
+    1,
+    1,
+    4,
+    4,
+    0,
+    &error
+  );
+
+  if (!succ)
+    g_warning ("failed to load placeholder texture: %s\n", error?error->message:"");
+}
+
+static void abandon_slide (ClutterRenderer *renderer,
+                           PinPointPoint   *point)
+{
+  ClutterPointData *data      = point->data;
+  if (data->background)
+    {
+      if (point->bg_type == PP_BG_IMAGE && !data->bg_placeholder)
+        {
+          _set_placeholder_texture( (ClutterTexture*)data->background );
+          data->bg_placeholder = 1;
+        }
     }
 }
 
@@ -2121,6 +2178,7 @@ show_slide (ClutterRenderer *renderer, gboolean backwards)
       clutter_actor_set_background_color (renderer->stage, &color);
     }
 
+  prepare_neighbour_backgrounds (renderer);
   if (data->background)
     {
       pp_clutter_render_adjust_background (renderer, point);
