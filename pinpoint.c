@@ -96,6 +96,7 @@ PinPointPoint *point_defaults = &default_point;
 
 char     *pp_output_filename = NULL;
 gboolean  pp_fullscreen      = FALSE;
+gboolean  pp_hidecursor      = FALSE;
 gboolean  pp_maximized       = FALSE;
 gboolean  pp_speakermode     = FALSE;
 gboolean  pp_rehearse        = FALSE;
@@ -110,6 +111,8 @@ static GOptionEntry entries[] =
 "                                         [command=] spawned apps.", NULL},
     { "fullscreen", 'f', 0, G_OPTION_ARG_NONE, &pp_fullscreen,
     "Start in fullscreen mode", NULL},
+    { "hide-cursor", 'h', 0, G_OPTION_ARG_NONE, &pp_hidecursor,
+    "Hide the mouse cursor", NULL},
     { "speakermode", 's', 0, G_OPTION_ARG_NONE, &pp_speakermode,
     "Show speakermode window", NULL},
     { "rehearse", 'r', 0, G_OPTION_ARG_NONE, &pp_rehearse,

@@ -118,6 +118,7 @@ struct _PinPointPoint
 
 extern char     *pp_output_filename;
 extern gboolean  pp_fullscreen;
+extern gboolean  pp_hidecursor;
 extern gboolean  pp_maximized;
 extern gboolean  pp_speakermode;
 extern gboolean  pp_rehearse;
