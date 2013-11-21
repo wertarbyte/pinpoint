@@ -86,6 +86,7 @@ static PinPointPoint pin_default_point = {
 
   .camera_framerate = 0,                    /* auto */
   .camera_resolution = {0, 0},              /* auto */
+  .camera_id = -1,                          /* auto */
 
   .data = NULL,
 };
@@ -99,7 +100,7 @@ gboolean  pp_fullscreen      = FALSE;
 gboolean  pp_maximized       = FALSE;
 gboolean  pp_speakermode     = FALSE;
 gboolean  pp_rehearse        = FALSE;
-char     *pp_camera_device   = NULL;
+char    **pp_camera_device   = NULL;
 
 static GOptionEntry entries[] =
 {
@@ -117,7 +118,7 @@ static GOptionEntry entries[] =
     { "output", 'o', 0, G_OPTION_ARG_STRING, &pp_output_filename,
       "Output presentation to FILE\n"
 "                                         (formats supported: pdf)", "FILE" },
-    { "camera", 'c', 0, G_OPTION_ARG_STRING, &pp_camera_device,
+    { "camera", 'c', 0, G_OPTION_ARG_FILENAME_ARRAY, &pp_camera_device,
       "Device to use for [camera] background", "DEVICE" },
     { NULL }
 };
@@ -187,6 +188,11 @@ main (int    argc,
   if (!g_option_context_parse (context, &argc, &argv, &error))
     {
       g_print ("option parsing failed: %s\n", error->message);
+      return EXIT_FAILURE;
+    }
+  if (pp_camera_device && g_strv_length(pp_camera_device) > MAX_CAMERAS)
+    {
+      g_print ("Unable to handle more than %d camera devices, %d specified.\n", MAX_CAMERAS, g_strv_length(pp_camera_device));
       return EXIT_FAILURE;
     }
 
@@ -464,6 +470,7 @@ parse_setting (PinPointPoint *point,
   IF_PREFIX("transition=") point->transition = STRING;
   IF_PREFIX("camera-framerate=")  point->camera_framerate = INT;
   IF_PREFIX("camera-resolution=") RESOLUTION (point->camera_resolution);
+  IF_PREFIX("camera-id=")  point->camera_id = INT;
   IF_EQUAL("fill")         point->bg_scale = PP_BG_FILL;
   IF_EQUAL("fit")          point->bg_scale = PP_BG_FIT;
   IF_EQUAL("stretch")      point->bg_scale = PP_BG_STRETCH;
