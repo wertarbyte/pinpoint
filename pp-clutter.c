@@ -492,10 +492,12 @@ static gboolean stage_motion (ClutterActor *actor,
 {
   float stage_width, stage_height;
 
-  if (hide_cursor)
-    g_source_remove (hide_cursor);
-  clutter_stage_show_cursor (CLUTTER_STAGE (actor));
-  hide_cursor = g_timeout_add (500, hide_cursor_cb, actor);
+  if (pp_hidecursor) {
+    if (hide_cursor)
+      g_source_remove (hide_cursor);
+    clutter_stage_show_cursor (CLUTTER_STAGE (actor));
+    hide_cursor = g_timeout_add (500, hide_cursor_cb, actor);
+  }
 
   if (!pp_get_fullscreen (renderer, CLUTTER_STAGE (actor)))
     return FALSE;
